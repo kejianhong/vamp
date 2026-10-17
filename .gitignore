@@ -20,6 +20,7 @@ venv/
 /resources/panda/*.json
 /resources/panda/*.pkl
 src/vamp/_core/*.pyi
+src/vamp/_core/*.so
 /.mypy_cache/
 .DS_store
 vamp-web/

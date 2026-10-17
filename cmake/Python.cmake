@@ -135,4 +135,16 @@ if(VAMP_BUILD_PYTHON_BINDINGS)
       DESTINATION "${CMAKE_SOURCE_DIR}/src/vamp/_core"
     )
   endforeach()
-endif() 
+
+  if(UNIX AND NOT SKBUILD)
+    add_custom_command(TARGET _core_ext POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E rm -f
+        "${CMAKE_SOURCE_DIR}/src/vamp/_core/$<TARGET_FILE_NAME:_core_ext>"
+      COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "$<TARGET_FILE:_core_ext>"
+        "${CMAKE_SOURCE_DIR}/src/vamp/_core/$<TARGET_FILE_NAME:_core_ext>"
+      VERBATIM
+      COMMENT "Symlinking vamp package and _core_ext extension into build tree"
+    )
+  endif()
+endif()
