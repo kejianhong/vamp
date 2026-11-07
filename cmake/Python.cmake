@@ -135,6 +135,18 @@ if(VAMP_BUILD_PYTHON_BINDINGS)
     target_compile_options(_core_ext PRIVATE -Wno-c++11-narrowing -Wno-sign-compare)
   endif()
 
+  if(UNIX AND NOT SKBUILD)
+    add_custom_command(TARGET _core_ext POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E rm -f
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/vamp/_core/$<TARGET_FILE_NAME:_core_ext>"
+      COMMAND ${CMAKE_COMMAND} -E create_symlink
+              "$<TARGET_FILE:_core_ext>"
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/vamp/_core/$<TARGET_FILE_NAME:_core_ext>"
+      VERBATIM
+      COMMENT "Symlinking $<TARGET_FILE_NAME:_core_ext> into src/vamp/_core"
+      )
+  endif()
+
   nanobind_add_stub(
     vamp_stub
     MODULE _core_ext
