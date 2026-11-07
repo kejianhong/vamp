@@ -247,6 +247,19 @@ namespace vamp::binding
             return vamp::planning::simplify<Robot, rake, Robot::resolution>(p, EnvVec(env), settings, rng);
         }
 
+        static auto build_roadmap(
+            const Cfg &start,
+            const Cfg &goal,
+            const Env &env,
+            const PRMSettings &settings,
+            std::shared_ptr<Sampler> rng) -> Roadmap
+        {
+            check_pins(rng, Input::to(start), "Start");
+            check_pins(rng, Input::to(goal), "Goal");
+            return vamp::planning::PRM<Robot, rake, Robot::resolution>::build_roadmap(
+                Input::to(start), Input::to(goal), EnvVec(env), settings, rng);
+        }
+
         // Shared skeleton of the constrained planner entry points: convert
         // inputs, enforce per-state feasibility with the family's remedy message, and
         // dispatch to the local-planner-aware solver. Callers handle their empty-set
@@ -683,6 +696,29 @@ namespace vamp::binding
         bind_path_io<TC>(path_k);
 
         bind_planning_result<TA>(submodule, "PlanningResult");
+
+        using RoadmapT = typename TA::Roadmap;
+        nb::class_<RoadmapT>(submodule, "Roadmap", "Undirected graph in configuration space.")
+            .def(nb::init<>(), "Empty constructor.")
+            .def(
+                "__len__",
+                [](const RoadmapT &r) { return r.vertices.size(); },
+                "Return the number of vertices in the roadmap.")
+            .def(
+                "__getitem__",
+                [](const RoadmapT &r, std::size_t i) -> typename NA::Type
+                {
+                    if (i >= r.vertices.size())
+                    {
+                        throw nb::index_error();
+                    }
+
+                    return NA::from(r.vertices[i]);
+                },
+                "Get the i-th vertex.")
+            .def_ro("edges", &RoadmapT::edges, "Adjacency list, by vertex index.")
+            .def_ro("nanoseconds", &RoadmapT::nanoseconds, "Nanoseconds taken to construct the roadmap.")
+            .def_ro("iterations", &RoadmapT::iterations, "Number of iterations taken to construct the roadmap.");
 
         bind_robot_methods<TA>(submodule);
         bind_robot_methods<TC>(submodule);

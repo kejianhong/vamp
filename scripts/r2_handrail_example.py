@@ -316,7 +316,13 @@ def main(
     constraint_settings = vamp.ConstraintSettings()
     constraint_settings.max_iterations = 50
     goal_settings = vamp.ConstraintSettings()
-    goal_settings.max_iterations = 200
+    goal_settings.max_iterations = 300
+    # Snapping a goal seed onto the manifold needs every row free to move. With the default
+    # hold_satisfied_rows the already-satisfied mode rows (waist position/yaw, stance foot) are
+    # held as pose equalities, freezing the torso and preventing the crossover step's swing foot
+    # from ever reaching its target rail -- the projection then never converges (the rail-2
+    # crossover is the first step that hits this). Planning itself keeps the default.
+    goal_settings.hold_satisfied_rows = False
 
     fk = ForwardKinematics(module.joint_names())
     rng = np.random.default_rng(obstacle_seed)

@@ -196,6 +196,15 @@ namespace vamp::binding
             "settings"_a,
             "sampler"_a,
             "Simplification heuristics to post-process a path.");
+        t.def(
+            "roadmap",
+            &Traits::build_roadmap,
+            "start"_a,
+            "goal"_a,
+            "environment"_a,
+            "settings"_a,
+            "sampler"_a,
+            "Build the PRM roadmap between a start and goal configuration.");
 
         t.def("halton", &Traits::make_halton, "Create a Halton sampler for this robot.");
         t.def("xorshift", &Traits::make_xorshift, "seed"_a = std::uint64_t{0}, "Create an XORShift sampler.");
