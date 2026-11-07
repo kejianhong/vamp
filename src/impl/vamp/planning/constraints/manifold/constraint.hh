@@ -138,14 +138,19 @@ namespace vamp::planning::constraint
         }
     };
 
-    // Detects constraints that provide a bounded least-squares step (a public `bounded_ls` member).
+    // Detects constraints that provide a bounded least-squares step (a public `bounded_ls`
+    // member). The member carries a bool rather than being a bare tag: a constraint class can
+    // exist for robots whose generated header predates the bounded solver, and it then sets
+    // `bounded_ls` to false so that step() falls back to InnerLM instead of naming a kernel
+    // that the robot does not have.
     template <typename T, typename = void>
     struct has_bounded_solver : std::false_type
     {
     };
 
     template <typename T>
-    struct has_bounded_solver<T, std::void_t<decltype(T::bounded_ls)>> : std::true_type
+    struct has_bounded_solver<T, std::void_t<decltype(T::bounded_ls)>>
+      : std::bool_constant<T::bounded_ls>
     {
     };
 
